@@ -14,7 +14,7 @@
 #include "vertex.h"
 
 
-/*---------------------------------------------------------------------------*/ 
+/*---------------------------------------------------------------------------*/
 PVERTEX GetMemVertex (INT NDim)
 
 {
@@ -23,25 +23,25 @@ PVERTEX GetMemVertex (INT NDim)
 
  pV           = (PVERTEX)GetMem((SIZE)1,    (SIZE)sizeof(VERTEX),
                  "GetMemVertex");
- pV->pX       = (PREAL)  GetMem((SIZE)NDim, (SIZE)sizeof(REAL),  
-                 "GetMemVertex->pX");	       
- return pV;			       
+ pV->pX       = (PREAL)  GetMem((SIZE)NDim, (SIZE)sizeof(REAL),
+                 "GetMemVertex->pX");
+ return pV;
 }
 
-/*---------------------------------------------------------------------------*/ 
+/*---------------------------------------------------------------------------*/
 PVERTEX NewVertex (INT NDim, PREAL pCoor)
-{ 
+{
 
  static int NVertex=0;
- 
+
  PVERTEX pV;
 
- pV                 = GetMemVertex (NDim);		       
- 
+ pV                 = GetMemVertex (NDim);
+
  pV->NVertex        = NVertex++;
- 
+
  CopyVR(pV->pX,pCoor,NDim);
- 
+
  return pV;
 }
 
@@ -54,12 +54,12 @@ PVERTEX FreeVertex (PVERTEX pV)
      fputs("FreeVertex: Trying to free a null vertex pointer.",stderr);
      exit(1);
     }
- else    
+ else
     {
      free((PVOID) pV->pX);
      free((PVOID) pV);
      return NULL;
-    } 
+    }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -70,7 +70,7 @@ PVERTEX CopyVertex(PVERTEX pVO, INT NDim)
 
 
 /*---------------------------------------------------------------------------*/
-VOID PrintVertex(PVERTEX pV, INT NDim) 
+VOID PrintVertex(PVERTEX pV, INT NDim)
 {
   fputs("X =\n",stderr);
   PrintVR(stderr,pV->pX,NDim);
@@ -78,28 +78,28 @@ VOID PrintVertex(PVERTEX pV, INT NDim)
 
   fputs("\n",stderr);
  }
- 
- 
+
+
 /*---------------------------------------------------------------------------*/
-VOID DrawVertex(PVERTEX pV, INT WWidth, PCHAR color) 
+VOID DrawVertex(PVERTEX pV, INT WWidth, PCHAR color)
 {
  printf("DrawPoint\n");
 
  printf("%f\n",XInWindow(pV->pX,WWidth));
  printf("%f\n",YInWindow(pV->pX,WWidth));
- 
- printf("%s\n",color);     
+
+ printf("%s\n",color);
 
  printf("%d\n",pV->NVertex);
  fflush(stdout);
-} 
-  
+}
+
 
 /*---------------------------------------------------------------------------*/
 VOID DelVertex(PVERTEX pV)
 {
  printf("DelPoint\n");
- printf("%d\n",pV->NVertex); 
+ printf("%d\n",pV->NVertex);
 }
 
 
@@ -107,11 +107,11 @@ VOID DelVertex(PVERTEX pV)
 INT BytesByVertex(INT NDim)
 {
  INT Total=0;
- 
+
  Total += sizeof(VERTEX);
  Total += NDim*sizeof(REAL);
- 
- return Total;  
+
+ return Total;
 }
 
 /*---------------------------------------------------------------------------*/
