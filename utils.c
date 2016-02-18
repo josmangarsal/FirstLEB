@@ -95,7 +95,7 @@ COMPARE CompareVR (PREAL VR1, PREAL VR2, INT NDim)
  Result=Equal;
  
  for (i=0;i<NDim;i++)
-     if (VR1[i]!=VR2[i])
+     if (!EQ(VR1[i],VR2[i]))
         {
 	 if (VR1[i]<VR2[i])
 	     Result=Smaller;
