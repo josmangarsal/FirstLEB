@@ -2,7 +2,7 @@
 			btsimplex.c  - description
 			----------------------
                     L.G. Casado leo@ual.es. 2014. GPLv3.
-	
+
 *******************************************************************************/
 
 #include <stdlib.h>
@@ -11,15 +11,15 @@
 #include "getmem.h"
 #include "utils.h"
 #include "vertex.h"
-#include "btvertex.h"
 #include "simplex.h"
 #include "btsimplex.h"
+#include "btvertex.h"
 
 /*---------------------------------------------------------------------------*/
 PBTSNODE NewBTSNODE(PSIMPLEX pS)
 {
  PBTSNODE pBTSNode;
- 
+
  pBTSNode	   = GetMem(1,sizeof(BTSNODE),"NewBTSNODE");
  pBTSNode->pS      = pS;
  pBTSNode->Balance = EQUAL;
@@ -40,7 +40,7 @@ PBTSNODE FreeBTSNode(PBTSNODE pBTSNode, INT NDim)
      pBTSNode->pS=FreeSimplex(pBTSNode->pS,NDim);
  free((PVOID)pBTSNode);
  pBTSNode=NULL;
- return pBTSNode;   
+ return pBTSNode;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -48,7 +48,7 @@ PBTSNODE FreeBTSNode(PBTSNODE pBTSNode, INT NDim)
 VOID SwapBTSNode(PBTSNODE pBTSNodeO, PBTSNODE pBTSNodeT)
 {
  PSIMPLEX pS;
- 
+
  pS            = pBTSNodeO->pS;
  pBTSNodeO->pS = pBTSNodeT->pS;
  pBTSNodeT->pS = pS;
@@ -67,7 +67,7 @@ VOID ExchangeNode(PBTSNODE node1, PBTSNODE node2)
 
  node2->pleft   = NULL;
  node2->pright  = NULL;
-} 
+}
 
 /*---------------------------------------------------------------------------*/
 void PrintBTSSubTreeInOrder(PBTSNODE node, INT NDim)
@@ -105,7 +105,7 @@ PBTS NewBTS(PBTS pBTS)
 {
  pBTS                 = GetMem(1,sizeof(BTS),"NewBTS");
  pBTS->NElem          = 0;
- pBTS->MaxNElem       = 0;	
+ pBTS->MaxNElem       = 0;
  pBTS->pFirstBTSNode  = NULL;
  return pBTS;
 }
@@ -131,7 +131,7 @@ PBTS FreeBTS(PBTS pbts,INT NDim)
      free((PVOID)pbts);
      pbts=NULL;
     }
- return NULL;   
+ return NULL;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -139,7 +139,7 @@ void PrintBTS(PBTS pbts, INT NDim)
 {
  if (pbts!=NULL)
     {
-     PrintBTSSubTree(pbts->pFirstBTSNode,NDim);    
+     PrintBTSSubTree(pbts->pFirstBTSNode,NDim);
      fprintf(stderr,"Number of Elements     = %d\n",pbts->NElem);
      fprintf(stderr,"Max Number of Elements = %d\n",pbts->MaxNElem);
     }
@@ -174,7 +174,7 @@ PBTSNODE RotateTreeLeft(PBTSNODE root)
         Temp->pleft  = root;
         root=Temp;
        }
- return Temp;      
+ return Temp;
 }
 /*----------------------------------------------------------------------------*/
 /*Rotate right a binary Tree                                                  */
@@ -182,7 +182,7 @@ PBTSNODE RotateTreeLeft(PBTSNODE root)
 PBTSNODE RotateTreeRight(PBTSNODE root)
 {
  PBTSNODE Temp;
- 
+
  if (root==NULL)
     {
      fprintf(stderr,"BTSimplex::RotateTreeRight :");
@@ -202,7 +202,7 @@ PBTSNODE RotateTreeRight(PBTSNODE root)
         Temp->pright = root;
         root=Temp;
        }
- return Temp;      
+ return Temp;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -252,7 +252,7 @@ PBTSNODE LeftInsertTreeBalance(PBTSNODE root, PBOOL ptaller)
               *ptaller=False;
               break;
         }
- return root;	
+ return root;
 }
 
 
@@ -300,13 +300,13 @@ PBTSNODE RightInsertTreeBalance(PBTSNODE root, PBOOL ptaller)
               *ptaller=False;
               break;
         }
- return root;	
+ return root;
 }
 
 
 /*---------------------------------------------------------------------------*/
 /*Do the actual insertion in the BTSimplex.                                  */
-/*---------------------------------------------------------------------------*/ 
+/*---------------------------------------------------------------------------*/
 PBTSNODE InsertTree (PBTSNODE root, PSIMPLEX pS, PBOOL ptaller)
 {
  if (root==NULL)
@@ -318,7 +318,7 @@ PBTSNODE InsertTree (PBTSNODE root, PSIMPLEX pS, PBOOL ptaller)
     {
      if (pS->NSimplex==root->pS->NSimplex)
         {
-         fprintf(stderr,"InsertTree: Simplex %lld already exists.\n", pS->NSimplex); 
+         fprintf(stderr,"InsertTree: Simplex %lld already exists.\n", pS->NSimplex);
          exit(1);
         }
      else
@@ -359,7 +359,7 @@ PBTSNODE InsertTree (PBTSNODE root, PSIMPLEX pS, PBOOL ptaller)
                        }
             }
     }
- return root;   
+ return root;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -370,10 +370,10 @@ VOID InsertBTS(PBTS pbts, PSIMPLEX pS)
  pbts->pFirstBTSNode=InsertTree(pbts->pFirstBTSNode,pS,&taller);
 
  pbts->NElem++;
- 
+
  if (pbts->NElem > pbts->MaxNElem)
      pbts->MaxNElem = pbts->NElem;
-	
+
 }
 
 
@@ -463,57 +463,57 @@ PBTSNODE RightDelTreeBalance (PBTSNODE root, PBOOL pshorter)
               root=RotateTreeLeft(root);
               break;
         }
- return root;	
+ return root;
 }
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-PBTSNODE ExtractNodeEqual (PBTSNODE root, INT NDim, INT NSimplex, 
+PBTSNODE ExtractNodeEqual (PBTSNODE root, INT NDim, INT NSimplex,
                            PBOOL pshorter, PPSIMPLEX ppS)
 {
  PBTSNODE Temp;
- 
+
  if (root==NULL)
     {
      fprintf(stderr,"BTSNODE,Free1: Empty BLTSimplex\n");
      exit(1);
-    }     
- else  
-    {     	      
+    }
+ else
+    {
      if (NSimplex==root->pS->NSimplex)
         {
 	 *ppS=root->pS;
 	 if (root->pleft==NULL && root->pright==NULL)
             {
-             root->pS=NULL; 
+             root->pS=NULL;
 	     root=FreeBTSNode(root,NDim);
-             *pshorter=True;     
-            } 
+             *pshorter=True;
+            }
 	 else
             if (root->pleft==NULL)
                {
         	Temp=root->pright;
-        	ExchangeNode(root,Temp); 
-        	*pshorter=True; 
-                Temp->pS=NULL;  
+        	ExchangeNode(root,Temp);
+        	*pshorter=True;
+                Temp->pS=NULL;
         	Temp=FreeBTSNode(Temp,NDim);
-               } 
+               }
             else
                if (root->pright==NULL)
                   {
                    Temp=root->pleft;
                    ExchangeNode(root,Temp);
-                   *pshorter=True; 
-                   Temp->pS=NULL;  
+                   *pshorter=True;
+                   Temp->pS=NULL;
                    Temp=FreeBTSNode(Temp,NDim);
-                  } 
+                  }
                else
                   {
                    for (Temp=root->pright;Temp->pleft!=NULL;
 		        Temp=Temp->pleft);
-                   SwapBTSNode(root,Temp);  
-                   root->pright=ExtractNodeEqual(root->pright, NDim, 
+                   SwapBTSNode(root,Temp);
+                   root->pright=ExtractNodeEqual(root->pright, NDim,
 		                                 NSimplex, pshorter, ppS);
                    if (*pshorter)
                       switch (root->Balance)
@@ -529,9 +529,9 @@ PBTSNODE ExtractNodeEqual (PBTSNODE root, INT NDim, INT NSimplex,
                                    root->Balance=EQUAL;
                                    break;
                              }
-                  } 
-        
-	}    	      
+                  }
+
+	}
      else
         if (NSimplex < root->pS->NSimplex)
            {
@@ -550,7 +550,7 @@ PBTSNODE ExtractNodeEqual (PBTSNODE root, INT NDim, INT NSimplex,
                        case RIGHT:
                             root=RightDelTreeBalance(root, pshorter);
                             break;
-                      }              
+                      }
            }
         else
            {
@@ -571,12 +571,12 @@ PBTSNODE ExtractNodeEqual (PBTSNODE root, INT NDim, INT NSimplex,
                             break;
                       }
            }
-    }	   
+    }
  return root;
 }
 
 
-/*---------------------------------------------------------------------------*/ 
+/*---------------------------------------------------------------------------*/
 VOID ExtractEqualBTS(PBTS pbts, INT NDim, INT NSimplex, PPSIMPLEX ppS)
 {
  BOOL shorter=False;
@@ -584,52 +584,52 @@ VOID ExtractEqualBTS(PBTS pbts, INT NDim, INT NSimplex, PPSIMPLEX ppS)
  pbts->pFirstBTSNode=ExtractNodeEqual(pbts->pFirstBTSNode, NDim, NSimplex,
                                     &shorter, ppS);
  pbts->NElem--;
-} 
+}
 
 
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-PBTSNODE ExtractSmallerNode(PBTSNODE root, INT NDim, PLLINT pNSimplex, 
+PBTSNODE ExtractSmallerNode(PBTSNODE root, INT NDim, PLLINT pNSimplex,
                             PBOOL pshorter, PPSIMPLEX ppS)
 {
  PBTSNODE Temp;
- 
+
  if (root==NULL)
     {
      fprintf(stderr,"BTSNODE,ExtractSmallerNode: Empty BTS\n");
      exit(1);
-    }     
+    }
 
  if (root->pleft!=NULL)
-    root->pleft= ExtractSmallerNode(root->pleft, NDim, pNSimplex, 
-     				    pshorter, ppS);	     
+    root->pleft= ExtractSmallerNode(root->pleft, NDim, pNSimplex,
+     				    pshorter, ppS);
  else
     {
      *ppS=root->pS;
      *pNSimplex = (*ppS)->NSimplex;
-    } 
-    
- /*Check if the node have to be removed*/ 
- if (root->pS->NSimplex == *pNSimplex) 
-    { 
+    }
+
+ /*Check if the node have to be removed*/
+ if (root->pS->NSimplex == *pNSimplex)
+    {
      if (root->pleft==NULL && root->pright==NULL)
 	{
          root->pS=NULL;
 	 root=FreeBTSNode(root,NDim);
-	 *pshorter=True; 
-	 /*The new Smaller value was given in the path*/    
-	} 
+	 *pshorter=True;
+	 /*The new Smaller value was given in the path*/
+	}
      else
 	{
 	 Temp=root->pright;
-	 ExchangeNode(root,Temp); 
+	 ExchangeNode(root,Temp);
 	 *pshorter=True;
-         Temp->pS=NULL;   
+         Temp->pS=NULL;
 	 Temp=FreeBTSNode(Temp,NDim);
-	} 
-    }    	      
+	}
+    }
  else /*root->Key > *pNSimplex */
     {
      if (*pshorter)
@@ -645,9 +645,9 @@ PBTSNODE ExtractSmallerNode(PBTSNODE root, INT NDim, PLLINT pNSimplex,
         	case RIGHT:
                      root=RightDelTreeBalance(root, pshorter);
                      break;
-               }              
+               }
     }
-    
+
  return root;
 }
 
@@ -668,45 +668,45 @@ VOID ExtractSmallerBTS(PBTS pbts, INT NDim, PPSIMPLEX ppS)
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-PBTSNODE ExtractGreaterNode(PBTSNODE root, INT NDim, PLLINT pNSimplex, 
+PBTSNODE ExtractGreaterNode(PBTSNODE root, INT NDim, PLLINT pNSimplex,
                             PBOOL pshorter, PPSIMPLEX ppS)
 {
  PBTSNODE Temp;
- 
+
  if (root==NULL)
     {
      fprintf(stderr,"BTSNODE,ExtractGreaterNode: Empty BTS\n");
      exit(1);
-    }     
+    }
 
  if (root->pright!=NULL)
-    root->pright= ExtractGreaterNode(root->pright, NDim, pNSimplex, 
-     				    pshorter, ppS);	     
+    root->pright= ExtractGreaterNode(root->pright, NDim, pNSimplex,
+     				    pshorter, ppS);
  else
     {
      *ppS=root->pS;
      *pNSimplex = (*ppS)->NSimplex;
-    } 
-    
- /*Check if the node have to be removed*/ 
- if (root->pS->NSimplex == *pNSimplex) 
-    { 
+    }
+
+ /*Check if the node have to be removed*/
+ if (root->pS->NSimplex == *pNSimplex)
+    {
      if (root->pleft==NULL && root->pright==NULL)
 	{
          root->pS=NULL;
 	 root=FreeBTSNode(root,NDim);
-	 *pshorter=True; 
-	 /*The new Smaller value was given in the path*/    
-	} 
+	 *pshorter=True;
+	 /*The new Smaller value was given in the path*/
+	}
      else
 	{
 	 Temp=root->pleft;
-	 ExchangeNode(root,Temp); 
+	 ExchangeNode(root,Temp);
 	 *pshorter=True;
-         Temp->pS=NULL;   
+         Temp->pS=NULL;
 	 Temp=FreeBTSNode(Temp,NDim);
-	} 
-    }    	      
+	}
+    }
  else /*root->Key > *pNSimplex */
     {
      if (*pshorter)
@@ -722,9 +722,9 @@ PBTSNODE ExtractGreaterNode(PBTSNODE root, INT NDim, PLLINT pNSimplex,
                 case RIGHT:
                      root->Balance=EQUAL;
                      break;
-               }      
+               }
     }
-    
+
  return root;
 }
 
@@ -756,7 +756,7 @@ INT GetSmallerNSimplex(PBTS pbts)
     {
      Temp=pbts->pFirstBTSNode;
      while (Temp->pleft!=NULL)
-           Temp=Temp->pleft;    
+           Temp=Temp->pleft;
      return Temp->pS->NSimplex;
     }
 }
@@ -775,7 +775,7 @@ INT GetGreaterNSimplex(PBTS pbts)
     {
      Temp=pbts->pFirstBTSNode;
      while (Temp->pright!=NULL)
-           Temp=Temp->pright;    
+           Temp=Temp->pright;
      return Temp->pS->NSimplex;
     }
 }
@@ -790,7 +790,7 @@ void PrintStatBTS(FILE * FOut, PBTS pbts, PCHAR String)
         fprintf(FOut,"\e[1;31m");
      fprintf(FOut,"           %s: \n"  ,String);
      if (FOut==stderr)
-        fprintf(FOut,"\e[1;39m");	
+        fprintf(FOut,"\e[1;39m");
      fprintf(FOut,"MaxEle___: ");
      fprintf(FOut,"%10d \n",pbts->MaxNElem);
      fprintf(FOut,"NElem____: ");
@@ -801,4 +801,14 @@ void PrintStatBTS(FILE * FOut, PBTS pbts, PCHAR String)
 }
 
 /*---------------------------------------------------------------------------*/
+VOID checkVertices(PBTSNODE pNode, INT NDim, PBTV pbtvGridPoints){
+  if(pNode != NULL){
+			int i;
+			for(i = 0; i < NDim; i++)
+				VISITED(pbtvGridPoints->pFirstBTVNode, NDim, pNode->pS->ppV[i]->pX);
+
+      checkVertices(pNode->pleft, NDim, pbtvGridPoints);
+      checkVertices(pNode->pright, NDim, pbtvGridPoints);
+  }
+}
 /*---------------------------------------------------------------------------*/

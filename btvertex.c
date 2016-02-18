@@ -3,7 +3,7 @@
 			----------------------
 	begin		: May 2004
 	copywirght	: (C) 2004 by L.G.Casado.
-	
+
 *******************************************************************************/
 
 #include <stdlib.h>
@@ -11,19 +11,24 @@
 #include <values.h>
 #include "getmem.h"
 #include "utils.h"
-#include "vertex.h"
 #include "btvertex.h"
+
+
+
 
 /*---------------------------------------------------------------------------*/
 PBTVNODE NewBTVNODE(INT NDim, PREAL pCoor)
 {
  PBTVNODE pBTVNode;
- 
+
  pBTVNode          = GetMem(1,sizeof(BTVNODE),"NewBTVNODE");
- pBTVNode->pV      = NewVertex (NDim, pCoor);
+ pBTVNode->pV      = (PREAL)  GetMem((SIZE)NDim, (SIZE)sizeof(REAL),
+                      "NewBTVNODE->pV");
+ CopyVR(pBTVNode->pV,pCoor,NDim);
  pBTVNode->Balance = EQUAL;
  pBTVNode->pleft   = NULL;
  pBTVNode->pright  = NULL;
+ pBTVNode->visited = False;
  return pBTVNode;
 }
 
@@ -35,18 +40,18 @@ PBTVNODE FreeBTVNode(PBTVNODE pBTVNode)
      fprintf(stderr,"TRying to free a NULL BTVNODE pointer.\n");
      exit(1);
     }
- pBTVNode->pV=FreeVertex(pBTVNode->pV);
+ free( (PVOID) pBTVNode->pV);
  free((PVOID)pBTVNode);
  pBTVNode=NULL;
- return pBTVNode;   
+ return pBTVNode;
 }
 
 /*----------------------------------------------------------------------------*/
 /*Swap the nodes Vertexes, but the structure of the BLTree does not change.   */
 VOID SwapBTVNode(PBTVNODE pBTVNodeO, PBTVNODE pBTVNodeT)
 {
- PVERTEX pV;
- 
+ PREAL pV;
+
  pV            = pBTVNodeO->pV;
  pBTVNodeO->pV = pBTVNodeT->pV;
  pBTVNodeT->pV = pV;
@@ -65,37 +70,7 @@ VOID ExchangeBTVNode(PBTVNODE node1, PBTVNODE node2)
 
  node2->pleft   = NULL;
  node2->pright  = NULL;
-} 
-
-/*---------------------------------------------------------------------------*/
-void PrintBTVSubTreeInOrder(PBTVNODE node, INT NDim)
-{
- if (node!=NULL)
-    {
-     PrintBTVSubTreeInOrder(node->pleft,  NDim);
-     fprintf(stderr,"(%d)->",node->Balance);
-     PrintVertex (node->pV,NDim);
-     PrintBTVSubTreeInOrder(node->pright, NDim);
-    }
-  else
-     fprintf(stderr,"N ");
 }
-
-/*---------------------------------------------------------------------------*/
-void PrintBTVSubTree(PBTVNODE node, INT NDim)
-{
- if (node!=NULL)
-    {
-     fprintf(stderr,"(%d)->",node->Balance);
-     PrintVertex (node->pV,NDim);
-     PrintBTVSubTree(node->pleft,  NDim);
-     PrintBTVSubTree(node->pright, NDim);
-    }
-  else
-     fprintf(stderr,"N ");
-}
-
-
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -129,22 +104,8 @@ PBTV FreeBTV(PBTV pbtv)
      free((PVOID)pbtv);
      pbtv=NULL;
     }
- return NULL;   
+ return NULL;
 }
-
-/*---------------------------------------------------------------------------*/
-void PrintBTV(PBTV pbtv, INT NDim)
-{
- if (pbtv!=NULL)
-    {
-     PrintBTVSubTree(pbtv->pFirstBTVNode,NDim);    
-     fprintf(stderr,"Number of Elements     = %d\n",pbtv->NElem);
-     fprintf(stderr,"Max Number of Elements = %d\n",pbtv->MaxNElem);
-    }
-  else
-     fprintf(stderr,"N ");
-}
-
 
 
 /*----------------------------------------------------------------------------*/
@@ -173,7 +134,7 @@ PBTVNODE RotateBTVLeft(PBTVNODE root)
         Temp->pleft  = root;
         root=Temp;
        }
- return Temp;      
+ return Temp;
 }
 /*----------------------------------------------------------------------------*/
 /*Rotate right a binary Tree                                                  */
@@ -181,7 +142,7 @@ PBTVNODE RotateBTVLeft(PBTVNODE root)
 PBTVNODE RotateBTVRight(PBTVNODE root)
 {
  PBTVNODE Temp;
- 
+
  if (root==NULL)
     {
      fprintf(stderr,"BTVertex::RotateBTVRight :");
@@ -201,7 +162,7 @@ PBTVNODE RotateBTVRight(PBTVNODE root)
         Temp->pright = root;
         root=Temp;
        }
- return Temp;      
+ return Temp;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -251,7 +212,7 @@ PBTVNODE LeftInsertBTVBalance(PBTVNODE root, PBOOL ptaller)
               *ptaller=False;
               break;
         }
- return root;	
+ return root;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -298,19 +259,19 @@ PBTVNODE RightInsertBTVBalance(PBTVNODE root, PBOOL ptaller)
               *ptaller=False;
               break;
         }
- return root;	
+ return root;
 }
 
 
 /*---------------------------------------------------------------------------*/
 /*Do the actual insertion in the BLVertex.                                   */
 /*If exists, return the pointer to the vertex.                               */
-/*---------------------------------------------------------------------------*/ 
-PBTVNODE InsertBTV1 (PBTVNODE root, INT NDim, PREAL pCoor, 
+/*---------------------------------------------------------------------------*/
+PBTVNODE InsertBTV1 (PBTVNODE root, INT NDim, PREAL pCoor,
                      PBOOL ptaller, PBOOL pAdd)
 {
  COMPARE CompCoor;
- 
+
  if (root==NULL)
     {
      root     = NewBTVNODE(NDim,pCoor);
@@ -319,7 +280,7 @@ PBTVNODE InsertBTV1 (PBTVNODE root, INT NDim, PREAL pCoor,
     }
  else
     {
-     CompCoor=CompareVR(pCoor,root->pV->pX,NDim);
+     CompCoor=CompareVR(pCoor,root->pV,NDim);
      if (CompCoor!=Equal)
         {
          if (CompCoor==Smaller)
@@ -360,18 +321,18 @@ PBTVNODE InsertBTV1 (PBTVNODE root, INT NDim, PREAL pCoor,
                                  break;
                        }
             }
-        }    
+        }
     }
- return root;   
+ return root;
 }
 
 /*---------------------------------------------------------------------------*/
 VOID InsertBTV(PBTV pbtv, INT NDim, PREAL pCoor, PBOOL pAdd)
 {
  BOOL taller = False;
- 
- 
- *pAdd=False;  	
+
+
+ *pAdd=False;
  pbtv->pFirstBTVNode=InsertBTV1(pbtv->pFirstBTVNode,NDim,pCoor,
                                 &taller,pAdd);
  if (*pAdd==True)
@@ -382,7 +343,7 @@ VOID InsertBTV(PBTV pbtv, INT NDim, PREAL pCoor, PBOOL pAdd)
     }
 /* else
      fprintf(stderr,"Vertex already exists. Shared by %d Simplexes.\n",
-            (*ppV)->NSimplex); 
+            (*ppV)->NSimplex);
 */
 }
 
@@ -472,41 +433,41 @@ PBTVNODE RightDelBTVBalance (PBTVNODE root, PBOOL pshorter)
               root=RotateBTVLeft(root);
               break;
         }
- return root;	
+ return root;
 }
 
 /*---------------------------------------------------------------------------*/
 /*Delete the Vertex with the same Coordinates when it does not belong to a   */ /*Simplex.                                                                   */
 /*The variable shorter is initially True. When it becomes False, no further  */
 /*changes are needed. nDeleted return the number of deleted boxes.           */
-/*---------------------------------------------------------------------------*/ 
+/*---------------------------------------------------------------------------*/
 PBTVNODE FreeBTV1(PBTVNODE root, INT NDim, PREAL pCoor, PBOOL pshorter)
 {
  PBTVNODE Temp;
  COMPARE CompCoor;
- 
+
  if (root==NULL)
     {
      fprintf(stderr,"DelNode: Empty BLTVertex\n");
      exit(1);
-    }     
- else  
+    }
+ else
     {
-     CompCoor=CompareVR(pCoor,root->pV->pX,NDim);	      
+     CompCoor=CompareVR(pCoor,root->pV,NDim);
      if (CompCoor==Equal)
 	if (root->pleft==NULL && root->pright==NULL)
            {
 	    root=FreeBTVNode(root);
             *pshorter=True;
-           } 
+           }
 	else
            if (root->pleft==NULL)
               {
                Temp=root->pright;
-               ExchangeBTVNode(root,Temp); 
+               ExchangeBTVNode(root,Temp);
                *pshorter=True;
                Temp=FreeBTVNode(Temp);
-              } 
+              }
            else
               if (root->pright==NULL)
                  {
@@ -514,12 +475,12 @@ PBTVNODE FreeBTV1(PBTVNODE root, INT NDim, PREAL pCoor, PBOOL pshorter)
                   ExchangeBTVNode(root,Temp);
                   *pshorter=True;
                   Temp=FreeBTVNode(Temp);
-                 } 
+                 }
               else
                  {
                   for (Temp=root->pright;Temp->pleft!=NULL;
 		       Temp=Temp->pleft);
-                  SwapBTVNode(root,Temp);  
+                  SwapBTVNode(root,Temp);
                   root->pright=FreeBTV1(root->pright, NDim, pCoor, pshorter);
                   if (*pshorter)
                      switch (root->Balance)
@@ -535,7 +496,7 @@ PBTVNODE FreeBTV1(PBTVNODE root, INT NDim, PREAL pCoor, PBOOL pshorter)
                                   root->Balance=EQUAL;
                                   break;
                             }
-                 } 
+                 }
      else
         if (CompCoor==Smaller)
            {
@@ -553,7 +514,7 @@ PBTVNODE FreeBTV1(PBTVNODE root, INT NDim, PREAL pCoor, PBOOL pshorter)
                        case RIGHT:
                             root=RightDelBTVBalance(root, pshorter);
                             break;
-                      }              
+                      }
            }
         else
            {
@@ -573,21 +534,21 @@ PBTVNODE FreeBTV1(PBTVNODE root, INT NDim, PREAL pCoor, PBOOL pshorter)
                             break;
                       }
            }
-    }	   
+    }
  return root;
 }
 
-/*---------------------------------------------------------------------------*/ 
+/*---------------------------------------------------------------------------*/
 VOID FreeVertexBTV(PBTV pbtv, INT NDim, PREAL pCoor)
 {
  BOOL shorter=False;
 
  pbtv->pFirstBTVNode=FreeBTV1(pbtv->pFirstBTVNode, NDim, pCoor, &shorter);
  pbtv->NElem--;
-} 
+}
 
 /*---------------------------------------------------------------------------*/
-void PrintStatBTV(FILE * FOut, PBTV pbtv, PCHAR String, 
+VOID PrintStatBTV(FILE * FOut, PBTV pbtv, PCHAR String,
                    INT PosIni,INT PosEnd)
 {
  if (pbtv!=NULL)
@@ -595,13 +556,13 @@ void PrintStatBTV(FILE * FOut, PBTV pbtv, PCHAR String,
      if (FOut==stderr)
         fprintf(FOut,"\e[%d;0H",PosIni);
      fprintf(FOut,
-     "========== %s :\n",String);	 
+     "========== %s :\n",String);
      fprintf(FOut,"MaxEle___: ");
      fprintf(FOut,"%10d\n",pbtv->MaxNElem);
 
      fprintf(FOut,"NElem____: ");
-     fprintf(FOut,"%10d \n",pbtv->NElem);      
-          
+     fprintf(FOut,"%10d \n",pbtv->NElem);
+
      if (FOut==stderr)
         fprintf(FOut,"\e[%d;0H",PosEnd);
     }
@@ -610,4 +571,80 @@ void PrintStatBTV(FILE * FOut, PBTV pbtv, PCHAR String,
 }
 
 /*---------------------------------------------------------------------------*/
+VOID PrintBTV(PBTV pbtv, INT NDim){
+  PREORDEN(pbtv->pFirstBTVNode, NDim);
+}
+
+VOID PREORDEN(PBTVNODE pNode, INT NDim){
+  if(pNode != NULL){
+    int i;
+    for(i = 0; i < NDim; i++){
+      fprintf(stderr,"%f ",pNode->pV[i]);
+    }
+    fprintf(stderr,"(%d)\n", pNode->visited);
+    PREORDEN(pNode->pleft, NDim);
+    PREORDEN(pNode->pright, NDim);
+  }
+}
+
+BOOL VISITED(PBTVNODE pNode, INT NDim, PREAL pX){
+  if(pNode != NULL){
+    int i;
+    BOOL samePoint = True;
+    for(i = 0; i < NDim; i++){
+      if(!EQ(pNode->pV[i], pX[i])){
+        samePoint = False;
+        break;
+      }
+    }
+
+    if(samePoint == True){
+      pNode->visited = True;
+      return True;
+    }
+
+    if(samePoint == False){
+      BOOL left  = False;
+      BOOL right = False;
+
+      left  = VISITED(pNode->pleft, NDim, pX);
+      right = VISITED(pNode->pright, NDim, pX);
+
+      if(left == True || right == True){
+        return True;
+      }else{
+        return False;
+      }
+    }
+
+  }
+
+  return False;
+}
+
+INT  Count	(PBTVNODE pNode, INT NDim){
+  if(pNode != NULL){
+    int left = Count(pNode->pleft, NDim);
+    int right = Count(pNode->pright, NDim);
+
+    return 1 + left + right;
+  }
+
+  return 0;
+}
+
+INT  CountVisited	(PBTVNODE pNode, INT NDim){
+  if(pNode != NULL){
+    int left = CountVisited(pNode->pleft, NDim);
+    int right = CountVisited(pNode->pright, NDim);
+
+    if(pNode->visited == True){
+      return 1 + left + right;
+    }else{
+      return left + right;
+    }
+  }
+
+  return 0;
+}
 /*---------------------------------------------------------------------------*/

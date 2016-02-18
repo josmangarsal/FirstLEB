@@ -139,18 +139,19 @@ VOID DrawGridPoints(PQueue gridPoints, INT NDim, INT WWidth, PCHAR Color)
 int main(int argc,  char *argv[])
 {
  REAL 		Epsilon; 		/*Final procesion on simplex's size.*/
- INT 		  NDim;     		/*Dimension=NVertex*/
+ INT      	FinalDivPerEdge=0;      //ep =1/FinalDivPerEdge
+ INT 		NDim;     		/*Dimension=NVertex*/
  LLINT 		NEvalSimplex= 0;
  LLINT		NFinalSimplex=0;
- INT 		  WWidth;            	/*Graphical window's width*/
- BOOL		  Draw; 			/*GRaphical output using stdout*/
+ INT 		WWidth;            	/*Graphical window's width*/
+ BOOL		Draw; 			/*GRaphical output using stdout*/
  BOOL 		OutStat; 		/*OutPut statistics*/
- BOOL     NoStoreFinalS;
- INT 		  ScUp;   		/*Screen Update: after select ScUp simplexes*/
- PSIMPLEX pS, pS1;
- PBTS		  pbts=NULL;
+ BOOL           NoStoreFinalS;
+ INT 		ScUp;   	/*Screen Update: after select ScUp simplexes*/
+ PSIMPLEX 	pS, pS1;
+ PBTS		pbts=NULL;
  PBTS 		pbtsEnd=NULL;
- CHAR		  Execution[256];
+ CHAR		Execution[256];
  FILE *		FOut;
  clock_t        c1;
  struct tms     t1;
@@ -166,10 +167,36 @@ int main(int argc,  char *argv[])
     NDim = atoi(GetArg("-d",argc,argv));
 
 
- if (!ExistArg("-ep",argc,argv))
+ //Accuracy
+ if ((!ExistArg("-ep",argc,argv) && !ExistArg("-g",argc,argv)) ||
+     ( ExistArg("-ep",argc,argv) &&  ExistArg("-g",argc,argv)))
+   {
+    fputs("Parameter -ep  xor -g are neccesary.\n",stderr);
     ParametersError();
- else
-    Epsilon = (REAL)atof(GetArg("-ep",argc,argv));
+   }
+
+  //Number of divisions of an edge.
+ if (ExistArg("-g",argc,argv))
+    {
+     FinalDivPerEdge = (INT)atoi(GetArg("-g",argc,argv));
+     if (FinalDivPerEdge  <= 1 )
+        {
+	 fprintf(stderr,"-g  %d  <=1.\n",FinalDivPerEdge);
+	 exit(1);
+	}
+     Epsilon=1.0/FinalDivPerEdge;	
+    }
+
+ //Epsilon of the grid.
+ if (ExistArg("-ep",argc,argv))
+    {
+     Epsilon = (REAL)atof(GetArg("-ep",argc,argv));
+     if (Epsilon  <= 0 || Epsilon >= 1.0)
+        {
+	 fprintf(stderr,"Epsilon not in (0,1). -gep %f\n",Epsilon);
+	 exit(1);
+	}
+    }
 
 
  if (ExistArg("-w",argc,argv))
@@ -221,17 +248,15 @@ int main(int argc,  char *argv[])
      fprintf(stderr,"\e[2J");
     }
 
- sprintf(Execution,"LEB_-n_%d_-ep_%3.4f_-su_%d",NDim,Epsilon,ScUp);
+ sprintf(Execution,"FirstLEBonGrid-1.0_-n_%d_-ep_%3.4f_-su_%d",NDim,Epsilon,ScUp);
  fprintf(stderr,"%s\n",Execution);
-
-// Epsilon = Epsilon * sqrt(2);
 
  c1=times(&t1);
 
  // Generate gridpoints
 fprintf(stderr, "eps=%f\n", Epsilon);
 fprintf(stderr, "grid points=%f\n", ceil(1.0/Epsilon)+1.0);
- PQueue gridPoints = GenGrid(ceil(1.0/Epsilon)+1.0, NDim);
+PQueue gridPoints = GenGrid(ceil(1.0/Epsilon)+1.0, NDim);
 
  PBTV pbtvGridPoints = NULL; //AVL tree of grid points
  pbtvGridPoints = NewBTV (pbtvGridPoints);
@@ -246,12 +271,14 @@ fprintf(stderr, "grid points=%f\n", ceil(1.0/Epsilon)+1.0);
    }
 
    Next(gridPoints);
- }while(End(gridPoints) == 0);	
+ }while(End(gridPoints) == 0);
 
  PBTV pbtvVertices = NULL; //AVL tree of vertices
  pbtvVertices = NewBTV (pbtvVertices);
 
  /*Initiate Values:*/
+ Epsilon = Epsilon * sqrt(2);
+ fprintf(stderr, "Accuracy=%f\n", Epsilon);
 
  pbts      = NewBTS (pbts);
  pbtsEnd   = NewBTS (pbtsEnd);
@@ -314,7 +341,7 @@ if (OutStat)
      fprintf(stderr, "NVertices  = %d\n", pbtvVertices->NElem);
      fprintf(stderr,"GridPoints = %d(%d)\n", Count(pbtvGridPoints->pFirstBTVNode, NDim), CountVisited(pbtvGridPoints->pFirstBTVNode, NDim));
 
-     PrintBTV(pbtvGridPoints, NDim);
+  //   PrintBTV(pbtvGridPoints, NDim);
      //PrintBTV(pbtvVertices, NDim);
 
 //     fprintf(stderr,"NFinalS=%lld.\n",NFinalSimplex);

@@ -56,12 +56,12 @@ proc BoxEnd { w x y } {
   global box Z ZLevel
 
   catch {$w delete $box(last)}
- 
+
   set dist [Mayor [expr abs ([lindex $box(anchor) 0]-$x)] \
                   [expr abs ([lindex $box(anchor) 1]-$y)]]
- 
-  if {$dist > 10} { 
- 
+
+  if {$dist > 10} {
+
      set ZLevel [expr $ZLevel +1]
 
      set Z(xmed$ZLevel) [lindex $box(anchor) 0]
@@ -83,22 +83,22 @@ proc BoxEnd { w x y } {
      set Z(ydesp$ZLevel) [expr $Z(ymed0) - $Z(ymed$ZLevel)]
 
 
-     $w scale all $Z(xmed$ZLevel) $Z(ymed$ZLevel) $factorx $factory 
+     $w scale all $Z(xmed$ZLevel) $Z(ymed$ZLevel) $factorx $factory
      $w move  all $Z(xdesp$ZLevel) $Z(ydesp$ZLevel)
 
      catch {$w delete text}
      $w create text 30 10 -text "Zoom $ZLevel" -fill Red -tag text
 
      update idletask
-  }   
+  }
 }
 
 proc BoxUnZoom {w} {
   global box Z ZLevel
- 
-  catch {$w delete text} 
- 
-  if { $ZLevel > 0 } { 
+
+  catch {$w delete text}
+
+  if { $ZLevel > 0 } {
      set factorx [expr $Z(ancho$ZLevel).0 / $Z(ancho0).0]
      set factory [expr $Z(alto$ZLevel).0 / $Z(alto0).0]
 
@@ -106,24 +106,24 @@ proc BoxUnZoom {w} {
      $w move  all [expr -1.0 * $Z(xdesp$ZLevel)]  [expr -1.0 * $Z(ydesp$ZLevel)]
 
      set ZLevel [expr $ZLevel -1]
-     
+
      if { $ZLevel > 0 } {
         $w create text 30 10 -text "Zoom $ZLevel" -fill Red -tag text
      }
-  }   
+  }
 }
 
 proc ObjectZoom { w objeto } {
   global box Z ZLevel
- 
+
   if { $ZLevel > 0 } {
-     for { set i 1 } {$i <= $ZLevel } {incr i} { 
+     for { set i 1 } {$i <= $ZLevel } {incr i} {
 	 set factorx [expr $Z(ancho0).0 / $Z(ancho$i).0]
 	 set factory [expr $Z(alto0).0 / $Z(alto$i).0]
-	 $w scale $objeto $Z(xmed$i) $Z(ymed$i) $factorx $factory 
+	 $w scale $objeto $Z(xmed$i) $Z(ymed$i) $factorx $factory
 	 $w move  $objeto $Z(xdesp$i) $Z(ydesp$i)
-     }	 
-  }   
+     }
+  }
 
 }
 
@@ -142,16 +142,16 @@ set Z(xmed$ZLevel) [expr $Z(ancho0) / 2.0]
 set Z(ymed$ZLevel) [expr $Z(alto0) / 2.0]
 
 #xmin... son los valores de la ventana real
-gets stdin xmin 
-gets stdin xmax 
-gets stdin ymin 
+gets stdin xmin
+gets stdin xmax
+gets stdin ymin
 gets stdin ymax
 gets stdin epsi
 gets stdin funcion
 
 
-set font -*-fixed-*-*-*-*-*-[expr $Z(ancho0) / 4 + [expr $Z(ancho0) / 4 % 10] ]-*-*-*-*-*-* 
-set font2 -*-symbol-*-*-*-*-*-[expr $Z(ancho0) / 2 + [expr $Z(ancho0) / 2 % 10]]-*-*-*-*-*-*  
+set font -*-fixed-*-*-*-*-*-[expr $Z(ancho0) / 4 + [expr $Z(ancho0) / 4 % 10] ]-*-*-*-*-*-*
+set font2 -*-symbol-*-*-*-*-*-[expr $Z(ancho0) / 2 + [expr $Z(ancho0) / 2 % 10]]-*-*-*-*-*-*
 toplevel .win
 wm title .win $funcion
 wm iconname .win $funcion
@@ -172,13 +172,13 @@ pack  .win.fbottom.epsi -side right
 pack  .win.fbottom.tepsi -side right
 
 canvas .win.c -width $Z(ancho0) -heigh $Z(alto0) -bg Gray80 -borderwidth 0 \
-          -highlightthickness 0        
+          -highlightthickness 0
 #.win.c create rect 0 0 [expr $Z(ancho0)-1] [expr $Z(alto0)-1] -outline Black
 
 
-pack .win.fup -side top -fill x 
+pack .win.fup -side top -fill x
 pack .win.c -side top
-pack .win.fbottom -side top -fill x 
+pack .win.fbottom -side top -fill x
 
 set sigue 0
 frame .win.f -borderwidth 2 -relief sunken
@@ -187,17 +187,17 @@ button .win.f.c -text "Postscript" -padx 5 -pady 5 -command\
 	{.win.c postscript -file Blending.ps}
 button .win.f.f -text "CONTINUE" -padx 5 -pady 5 -command {incr sigue}
 pack .win.f -side top -fill x
-pack .win.f.b -side left 
-pack .win.f.c -side left 
+pack .win.f.b -side left
+pack .win.f.c -side left
 pack .win.f.f -side right
 
 
-BoxInit {.win.c} 
+BoxInit {.win.c}
 update idletask
 
 while { 0 < [gets stdin accion] } {
   switch $accion {
-        "DrawTriangle" { 
+        "DrawTriangle" {
 		    gets stdin x1
 		    gets stdin y1
 		    gets stdin x2
@@ -208,21 +208,21 @@ while { 0 < [gets stdin accion] } {
 		    gets stdin NTrian
 		    catch { .win.c delete Trian$NTrian }
 #		    .win.c create polygon $x1 $y1 $x2 $y2 $x3 $y3 $x1 $y1\
-#		     -fill $colorIn -outline Black -width 1 -tag Trian$NTrian 
+#		     -fill $colorIn -outline Black -width 1 -tag Trian$NTrian
 		    .win.c create line $x1 $y1 $x2 $y2 $x3 $y3 $x1 $y1\
-		     -fill $colorIn  -width 2 -tag Trian$NTrian 		    
+		     -fill $colorIn  -width 3 -tag Trian$NTrian
 		    ObjectZoom .win.c Trian$NTrian
-		    
+
 		    .win.c addtag Trian withtag Trian$NTrian
-		    
+
 		    catch {.win.c raise Point Trian$NTrian}
 		    catch {.win.c raise PC Trian$NTrian}
 		    catch {.win.c raise Const Trian$NTrian}
 		    catch {.win.c raise EpsCircle Trian$NTrian}
 		    catch {.win.c raise LineTrian Trian$NTrian}
-		    catch {.win.c raise LineCoorTrian Trian$NTrian}		    
+		    catch {.win.c raise LineCoorTrian Trian$NTrian}
 #		    tkwait variable sigue
-                    update idletask 
+                    update idletask
 	}
         "DelTriangle" {
                    gets stdin NTrian
@@ -230,7 +230,7 @@ while { 0 < [gets stdin accion] } {
 #		   tkwait variable sigue
                    update idletask
 	}
-        "DrawLineTriangle" { 
+        "DrawLineTriangle" {
 		    gets stdin x1
 		    gets stdin y1
 		    gets stdin x2
@@ -241,26 +241,26 @@ while { 0 < [gets stdin accion] } {
 		    gets stdin NTrian
 		    catch { .win.c delete LineTrian$NTrian }
 		    .win.c create line $x1 $y1 $x2 $y2 $x3 $y3 $x1 $y1\
-		     -fill $Color -width 3 -tag LineTrian$NTrian 
-		    
+		     -fill $Color -width 3 -tag LineTrian$NTrian
+
 		    ObjectZoom .win.c LineTrian$NTrian
-		    
-		    .win.c addtag LineTrian withtag LineTrian$NTrian 
-		    
+
+		    .win.c addtag LineTrian withtag LineTrian$NTrian
+
 		    catch {.win.c raise Point LineTrian$NTrian}
 		    catch {.win.c raise PC LineTrian$NTrian}
 		    catch {.win.c raise Const LineTrian$NTrian}
-		    catch {.win.c raise EpsCircle LineTrian$NTrian}		    
+		    catch {.win.c raise EpsCircle LineTrian$NTrian}
 #		    tkwait variable sigue
-                    update idletask 
+                    update idletask
 	}
         "DelLineTriangle" {
                    gets stdin NTrian
                    catch { .win.c delete LineTrian$NTrian }
 #		   tkwait variable sigue
                    update idletask
-	}		
-        "DrawLineCoorTriangle" { 
+	}
+        "DrawLineCoorTriangle" {
 		    gets stdin x1
 		    gets stdin y1
 		    gets stdin x2
@@ -271,26 +271,26 @@ while { 0 < [gets stdin accion] } {
 		    gets stdin NTrian
 		    catch { .win.c delete LineCoorTrian$NTrian }
 		    .win.c create line $x1 $y1 $x2 $y2 $x3 $y3 $x1 $y1\
-		     -fill $Color -width 3 -tag LineCoorTrian$NTrian 
-		    
+		     -fill $Color -width 3 -tag LineCoorTrian$NTrian
+
 		    ObjectZoom .win.c LineCoorTrian$NTrian
-		    
-		    .win.c addtag LineCoorTrian withtag LineCoorTrian$NTrian 
-		    
+
+		    .win.c addtag LineCoorTrian withtag LineCoorTrian$NTrian
+
 		    catch {.win.c raise Point LineCoorTrian$NTrian}
 		    catch {.win.c raise PC LineCoorTrian$NTrian}
 		    catch {.win.c raise Const LineCoorTrian$NTrian}
-		    catch {.win.c raise EpsCircle LineCoorTrian$NTrian}		    
+		    catch {.win.c raise EpsCircle LineCoorTrian$NTrian}
 #		    tkwait variable sigue
-                    update idletask 
+                    update idletask
 	}
         "DelLineCoorTriangle" {
                    gets stdin NTrian
                    catch { .win.c delete LineCoorTrian$NTrian }
 #		   tkwait variable sigue
                    update idletask
-	}	
-        "DrawLine" { 
+	}
+        "DrawLine" {
 		    gets stdin x1
 		    gets stdin y1
 		    gets stdin x2
@@ -299,49 +299,62 @@ while { 0 < [gets stdin accion] } {
 		    gets stdin NTrian
 		    .win.c create line $x1 $y1 $x2 $y2 \
 		     -fill $colorIn -width 2 -tag Trian$NTrian
-		    
+
 		    ObjectZoom .win.c Trian$NTrian
-		    
+
 		    catch {.win.c raise Point Trian$NTrian}
 		    catch {.win.c raise Const Trian$NTrian}
 #		    tkwait variable sigue
-                    update idletask 
+                    update idletask
 	}
         "DelLine" {
                    gets stdin NTrian
                    catch { .win.c delete Trian$NTrian }
 #		   tkwait variable sigue
                    update idletask
-	}		   
-        "DrawPoint" { 
+	}
+        "DrawPoint" {
 		    gets stdin x1
 		    gets stdin y1
 		    gets stdin color
 		    gets stdin NPoint
 		    set border black
-		    
+
 		    set Point [.win.c find withtag Point$NPoint]
 		    if { [llength $Point] == 0 } {
-		    .win.c create rect [expr $x1-0.05] [expr $y1-0.05] \
-		    [expr $x1+0.05] [expr $y1+0.05]  -fill $color\
-		    -width 2 -fill $color -outline $color \
-		     -tag Point$NPoint 
+          if {$color == "Red"} {
+		    .win.c create rect [expr $x1-4] [expr $y1-4] \
+		    [expr $x1+4] [expr $y1+4]  -fill $color\
+		    -width 2 -fill $color -outline $border \
+		     -tag Point$NPoint
+
+         .win.c addtag Point withtag Point$NPoint
+
+         } else {
+           .win.c create rect [expr $x1-10] [expr $y1-10] \
+   		    [expr $x1+10] [expr $y1+10]  -fill $color\
+   		    -width 2 -fill $color -outline $border \
+   		     -tag GPoint$NPoint
+
+           .win.c addtag GPoint withtag GPoint$NPoint
+         }
 
                     ObjectZoom .win.c Point$NPoint
-		    
-		    .win.c addtag Point withtag Point$NPoint
-		     
+
+        catch {.win.c raise Point GPoint}
+
 #		    tkwait variable sigue
+
                     }
                     unset Point
-                    update idletask 
+                    update idletask
 	}
         "DelPoint" {
                    gets stdin NPoint
                    catch { .win.c delete Point$NPoint }
 #		   tkwait variable sigue
                    update idletask
-	}	
+	}
 	"DrawConst" {
 		   gets stdin cuantos
 		   gets stdin color
@@ -353,18 +366,18 @@ while { 0 < [gets stdin accion] } {
         		gets stdin x2
         		lappend Puntos $x1 $x2
 		    }
-	
+
 		    eval {.win.c create line} $Puntos \
 		    -tag Const$NConst -width 3 -fill $color \
-		    -smooth off -dash  $ldash	
-		     
-		    .win.c addtag Const withtag Const$NConst 
+		    -smooth off -dash  $ldash
+
+		    .win.c addtag Const withtag Const$NConst
 		    catch {.win.c raise Point Const$NConst}
 #		    tkwait variable sigue
-                    
-                    update idletask 
+
+                    update idletask
 	}
-	"DrawCircle" { 
+	"DrawCircle" {
 		    gets stdin x1
 		    gets stdin y1
 		    gets stdin x2
@@ -372,19 +385,19 @@ while { 0 < [gets stdin accion] } {
 		    gets stdin color
 		    gets stdin ldash
 		    gets stdin NCircle
-		   
+
 		    .win.c create oval $x1 $y1 $x2 $y2 \
 		     -outline $color -width 3 -dash $ldash \
-		     -tag  Circle$NCircle  
-		      
+		     -tag  Circle$NCircle
+
 		    ObjectZoom .win.c Circle$NCircle
-		    
-		    .win.c addtag Circle withtag Circle$NCircle 
+
+		    .win.c addtag Circle withtag Circle$NCircle
 		    catch {.win.c raise Point Circle$NCircle}
 		    catch {.win.c raise PC Circle$NCircle}
 #		    tkwait variable sigue
-                    
-                    update idletask 
+
+                    update idletask
 	}
         "DelCircle" {
                    gets stdin NCircle
@@ -393,7 +406,7 @@ while { 0 < [gets stdin accion] } {
 #		   tkwait variable sigue
                    update idletask
 	}
-	"DrawEpsCircle" { 
+	"DrawEpsCircle" {
 		    gets stdin x1
 		    gets stdin y1
 		    gets stdin x2
@@ -401,59 +414,55 @@ while { 0 < [gets stdin accion] } {
 		    gets stdin OutLineColor
 		    gets stdin FillColor
 		    gets stdin NCircle
-		   
+
 		    .win.c create oval $x1 $y1 $x2 $y2 \
 		      -outline $OutLineColor -width 3 \
 		      -tag EpsCircle$NCircle
-		    
+
 		    ObjectZoom .win.c EpsCircle$NCircle
-		     
-		    .win.c addtag EpsCircle withtag EpsCircle$NCircle 
+
+		    .win.c addtag EpsCircle withtag EpsCircle$NCircle
 		    catch {.win.c raise Point EpsCircle$NCircle}
 		    catch {.win.c raise PC EpsCircle$NCircle}
 #		    tkwait variable sigue
-                    
-                    update idletask 
+
+                    update idletask
 	}
         "DelEpsCircle" {
                    gets stdin NCircle
                    catch { .win.c delete EpsCircle$NCircle }
 #		   tkwait variable sigue
                    update idletask
-	}	   	
-        "DrawPCover" { 
+	}
+        "DrawPCover" {
 		    gets stdin x1
 		    gets stdin y1
 		    gets stdin color
 		    gets stdin NPC
 		    set border black
-		    
+
 		    .win.c create rect [expr $x1-0.1] [expr $y1-0.1] \
 		    [expr $x1+0.1] [expr $y1+0.1] \
 		     -width 3 -fill $color -outline $color -tag PC$NPC
-		     
+
 		    ObjectZoom .win.c PC$NPC
-		     	      
-		    .win.c addtag PC withtag PC$NPC 
+
+		    .win.c addtag PC withtag PC$NPC
 #		    tkwait variable sigue
-                    
-                    update idletask 
+
+                    update idletask
 	}
         "DelPCover" {
                    gets stdin NPC
                    catch { .win.c delete PC$NPC }
 #		   tkwait variable sigue
                    update idletask
-	}		
-		
+	}
+
         "Wait" {
 	           tkwait variable sigue
                    update idletask
-	}	
-  }	
+	}
+  }
 }
 update idletask
-
-
-
-
