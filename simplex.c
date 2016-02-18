@@ -132,11 +132,57 @@ VOID PrintSimplex(PSIMPLEX pS, INT NDim)
  fflush(stderr);
 }
 
+/*---------------------------------------------------------------------------*/
+BOOL IsSInX123(PPVERTEX ppVertex, PINT pWhich, INT NDim)
+{
+ INT i;
+ INT NPointsIn3D=3;
+ 
+ if (NDim==3)
+    {
+     for (i=0;i<NDim;i++)
+         pWhich[i]=i;
+     return True;
+    }     
+
+ //Only simplices with 3 vertices at x1,x2,x3 neq 0 are drawn. 
+ if (NDim > 3)
+    {
+     NPointsIn3D=0;
+     for (i=0;i<NDim;i++) //Para cada vertice   
+         if (PointInX123(ppVertex[i]->pX,NDim))
+            { 
+             pWhich[NPointsIn3D]=i;
+             NPointsIn3D++;
+            }
+    }
+
+ if (NPointsIn3D>3)
+    {
+     fprintf(stderr,"CDSInX123: NPointsIn3D=%d.\n",NPointsIn3D);
+     
+     for (i=0;i<NPointsIn3D;i++)
+         {
+          fprintf(stderr,"v[%d]=\n",pWhich[i]);
+          PrintVertex(ppVertex[pWhich[i]],NDim);
+         }
+
+     fputs("\n",stderr);
+     exit(1);
+    } 
+ if (NPointsIn3D==3)    
+    return True;
+ else
+    return False;      
+}
 
 /*---------------------------------------------------------------------------*/
 VOID DrawSimplex(PSIMPLEX pS, INT WWidth, PCHAR Color)
 {
  INT i;
+ INT pWhich[64];
+ INT HowManyDraw; 
+ BOOL YesDraw=False;
 
  if (pS==NULL)
     {
@@ -144,66 +190,92 @@ VOID DrawSimplex(PSIMPLEX pS, INT WWidth, PCHAR Color)
      exit(1);
     }
 
+ for (i=0; i<pS->NVertex ;i++)
+         pWhich[i]=i;
+
  switch (pS->NVertex)
         {
 	 case 1:
-	      DrawVertex(pS->ppV[0],WWidth,Color);
+	      DrawVertex(pS->ppV[0],WWidth,pS->NVertex,Color);
 	      break;
 	 case 2:
 	      printf("DrawLine\n");
+              YesDraw=True;
 	      break;
-	 case 3:
+	 case 3: 
 	      printf("DrawTriangle\n");
+              YesDraw=True; 
 	      break;
 	 default:
-	      fprintf(stderr,"DrawSimplex: pS->NVertex=%d.\n",pS->NVertex);
-	      exit(1);
+	      if (IsSInX123(pS->ppV,pWhich, pS->NVertex))
+                 {
+                  printf("DrawTriangle\n");
+                  YesDraw=True;
+                 }
 	      break;
 	}
+ 
 
- if (pS->NVertex!=1)
+ if (pS->NVertex < 3)
+    HowManyDraw=pS->NVertex;
+ else
+    HowManyDraw=3;
+
+ if (pS->NVertex!=1 && YesDraw)
     {
-     for (i=0;i<pS->NVertex;i++)
+     for (i=0;i<HowManyDraw;i++)
 	 {
-	  printf("%f\n",XInWindow(pS->ppV[i]->pX,WWidth));
-	  printf("%f\n",YInWindow(pS->ppV[i]->pX,WWidth));
+	  printf("%f\n",XInWindow(pS->ppV[pWhich[i]]->pX,WWidth));
+	  printf("%f\n",YInWindow(pS->ppV[pWhich[i]]->pX,WWidth));
 	 }
      printf("%s\n",Color);
      printf("%lld\n",pS->NSimplex);
      fflush(stdout);
 
      for (i=0;i<pS->NVertex;i++)
-	 DrawVertex(pS->ppV[i],WWidth,"Red");
+	 DrawVertex(pS->ppV[i],WWidth,pS->NVertex,"Red");
     }
 
 }
 
 /*---------------------------------------------------------------------------*/
 VOID DelSimplex(PSIMPLEX pS)
-
+//Se puede pedir que lo borre anque no se haya pintado.
 {
  INT i;
-
-  if (pS==NULL)
+ INT pWhich[64];
+ 
+ if (pS==NULL)
     {
      fprintf(stderr,"DelSimplex; Null pointer to a simplex\n");
      exit(1);
     }
 
-for (i=0;i<pS->NVertex;i++)
-    DelVertex(pS->ppV[i]);
+ for (i=0;i<pS->NVertex;i++)
+     DelVertex(pS->ppV[i],pS->NVertex);
 
  switch (pS->NVertex)
         {
 	 case 2:
 	      printf("DelLine\n");
+              printf("%lld\n",pS->NSimplex);
+              fflush(stdout);
 	      break;
 	 case 3:
 	      printf("DelTriangle\n");
+              printf("%lld\n",pS->NSimplex);
+              fflush(stdout);
 	      break;
+        default: //NDim>3
+              if (IsSInX123(pS->ppV,pWhich, pS->NVertex))
+                 {
+                  printf("DelTriangle\n");
+                  printf("%lld\n",pS->NSimplex);
+                  fflush(stdout);
+                 }
+              break;  
 	}
- printf("%lld\n",pS->NSimplex);
- fflush(stdout);
+
 }
 
 /*---------------------------------------------------------------------------*/

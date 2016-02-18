@@ -34,7 +34,7 @@ void ParametersError()
 {
  fputs("Options are:\n",stderr);
  fputs("\t[ --help To show this help ],\n",stderr);
- fputs("\t  -d            <int>: dimension,\n",stderr);
+ fputs("\t[  -d           <int>: dimension[3]],\n",stderr);
  fputs("\t  -ep          <real>: Epsilon,\n",stderr);
  fputs("\t  -g            <int>: Epsilon=1/g,\n",stderr);
  fputs("\t[ -ns                : do not store final simplices,]\n",stderr);
@@ -121,7 +121,7 @@ BOOL PointInX123 (PREAL pX, INT NDim)
  INT i; 
  BOOL VInX123=True;
  
- if (NDim==3)
+ if (NDim<=3)
     return True;
  
  for (i=3;i<NDim;i++) //Las últimas coordenadas deben ser cero

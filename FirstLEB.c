@@ -104,32 +104,26 @@ PSIMPLEX GenInitialS(INT NDim)
 /*----------------------------------------------------------------------------*/
 VOID DrawGridPoints(PQueue gridPoints, INT NDim, INT WWidth, PCHAR Color)
 {
-  //int i;
-  int p = 1;
-  //fprintf(stderr,"GRID POINTS\n");
-  while(Front(gridPoints) != NULL){
-    double* point = Front(gridPoints);
-/*
-    for(i = 0; i < NDim; i++){
-      fprintf(stderr,"%f ", point[i]);
-    }
-    fprintf(stderr,"\n");
-*/
-    printf("DrawPoint\n");
+ int p = 1;
 
-    printf("%f\n",XInWindow(point,WWidth));
-    printf("%f\n",YInWindow(point,WWidth));
+ while (Front(gridPoints) != NULL)
+       {
+        double* point = Front(gridPoints);
+        if (PointInX123(point,NDim))
+           {
+            printf("DrawPoint\n");
 
-    printf("%s\n",Color);
-    printf("GP%d\n",p);
+            printf("%f\n",XInWindow(point,WWidth));
+            printf("%f\n",YInWindow(point,WWidth));
 
+            printf("%s\n",Color);
+            printf("GP%d\n",p);
+           }
     // No libero porque son los mismo punteros que tiene el arbol
     //free((void*)point);
     Pop(gridPoints);
-
-    p = p + 1;
+    p++;
   }
-
   fflush(stdout);
 }
 
@@ -162,7 +156,7 @@ int main(int argc,  char *argv[])
     ParametersError();
 
  if (!ExistArg("-d",argc,argv))
-    ParametersError();
+    NDim=3;
  else
     NDim = atoi(GetArg("-d",argc,argv));
 
@@ -198,12 +192,6 @@ int main(int argc,  char *argv[])
 	}
     }
 
-
- if (ExistArg("-w",argc,argv))
-     WWidth = atoi(GetArg("-w",argc,argv));
- else
-     WWidth = 400;
-
  if (ExistArg("-su",argc,argv))
      ScUp =  atoi(GetArg("-su",argc,argv));
  else
@@ -220,24 +208,21 @@ int main(int argc,  char *argv[])
     NoStoreFinalS = True;
 
  if (ExistArg("-tcl",argc,argv))
-    if (NDim!=3)
-       {
-	fprintf(stderr,"Only two dimensinal graphics are allowed. Dim=%d\n",
-	        NDim);
-	exit(1);
-       }
-    else
-       {
-	Draw = (UCHAR) atoi(GetArg("-tcl",argc,argv));
-	printf("%d\n",WWidth);
-	printf("%d\n",WWidth);
-	printf("0.0\n");
-	printf("1.0\n");
-	printf("0.0\n");
-	printf("1.0\n");
-	printf("%2.4f\n",Epsilon);
-	printf("NDim=%d\n",NDim);
-       }
+    {
+      if (ExistArg("-w",argc,argv))
+         WWidth = atoi(GetArg("-w",argc,argv));
+      else
+         WWidth = 400;
+     Draw = (UCHAR) atoi(GetArg("-tcl",argc,argv));
+     printf("%d\n",WWidth);
+     printf("%d\n",WWidth);
+     printf("0.0\n");
+     printf("1.0\n");
+     printf("0.0\n");
+     printf("1.0\n");
+     printf("%2.4f\n",Epsilon);
+     printf("NDim=%d\n",NDim);
+    }
  else
     Draw=False;
 
@@ -248,7 +233,10 @@ int main(int argc,  char *argv[])
      fprintf(stderr,"\e[2J");
     }
 
- sprintf(Execution,"FirstLEBonGrid-1.0_-n_%d_-ep_%3.4f_-su_%d",NDim,Epsilon,ScUp);
+ if (ExistArg("-g",argc,argv))
+    sprintf(Execution,"FirstLEBonGrid-1.1_-n_%d_-g_%d_-su_%d",NDim,FinalDivPerEdge,ScUp);
+ else
+    sprintf(Execution,"FirstLEBonGrid-1.1_-n_%d_-ep_%3.4f_-su_%d",NDim,Epsilon,ScUp);
  fprintf(stderr,"%s\n",Execution);
 
  c1=times(&t1);

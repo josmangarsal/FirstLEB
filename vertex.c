@@ -81,25 +81,31 @@ VOID PrintVertex(PVERTEX pV, INT NDim)
 
 
 /*---------------------------------------------------------------------------*/
-VOID DrawVertex(PVERTEX pV, INT WWidth, PCHAR color)
+VOID DrawVertex(PVERTEX pV, INT WWidth, INT NDim, PCHAR color)
 {
- printf("DrawPoint\n");
+ if (PointInX123(pV->pX,NDim))
+    {
+     printf("DrawPoint\n");
 
- printf("%f\n",XInWindow(pV->pX,WWidth));
- printf("%f\n",YInWindow(pV->pX,WWidth));
+     printf("%f\n",XInWindow(pV->pX,WWidth));
+     printf("%f\n",YInWindow(pV->pX,WWidth));
 
- printf("%s\n",color);
+     printf("%s\n",color);
 
- printf("%d\n",pV->NVertex);
- fflush(stdout);
+     printf("%d\n",pV->NVertex);
+     fflush(stdout);
+    }
 }
 
 
 /*---------------------------------------------------------------------------*/
-VOID DelVertex(PVERTEX pV)
+VOID DelVertex(PVERTEX pV, INT NDim)
 {
- printf("DelPoint\n");
- printf("%d\n",pV->NVertex);
+ if (PointInX123(pV->pX,NDim))
+    {
+     printf("DelPoint\n");
+     printf("%d\n",pV->NVertex);
+    }
 }
 
 

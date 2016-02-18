@@ -41,12 +41,12 @@ typedef PVERTEX *         	PPVERTEX;
 
 /*---------------------------------------------------------------------------*/
 PVERTEX GetMemVertex  (INT NDim);			 
-PVERTEX	NewVertex    	(INT NDim, PREAL Coor);
-PVERTEX	FreeVertex	  (PVERTEX pV);
+PVERTEX	NewVertex     (INT NDim, PREAL Coor);
+PVERTEX	FreeVertex    (PVERTEX pV);
 PVERTEX CopyVertex    (PVERTEX pVO, INT NDim);
-VOID	  PrintVertex   (PVERTEX pV, INT NDim);
-VOID    DrawVertex    (PVERTEX pV, INT WWidth, PCHAR color);
-VOID	  DelVertex     (PVERTEX pV);
+VOID	PrintVertex   (PVERTEX pV, INT NDim);
+VOID    DrawVertex    (PVERTEX pV, INT WWidth, INT NDim, PCHAR color);
+VOID	DelVertex     (PVERTEX pV, INT NDim);
 INT     BytesByVertex (INT NDim);
 
 

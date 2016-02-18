@@ -8,7 +8,7 @@ default : FirstLEB
 #-------------------------------------------------------------------------------
 FirstLEB : makefile FirstLEB.c argshand.o getmem.o utils.o vertex.o \
 	   simplex.o  btsimplex.o gengridpoints.o Queue.o btvertex.o
-	$(CC) $(DEBUG) $(FLAGS) -o FirstLEB FirstLEBonGrid.c \
+	$(CC) $(DEBUG) $(FLAGS) -o FirstLEB FirstLEB.c \
 	argshand.o getmem.o utils.o vertex.o \
 	simplex.o btsimplex.o gengridpoints.o Queue.o btvertex.o -L/usr/lib64 -lm
 
