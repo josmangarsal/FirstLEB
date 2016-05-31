@@ -206,9 +206,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (ExistArg("-g", argc, argv))
-		sprintf(Execution, "FirstLEBonGrid-1.1_-n_%d_-g_%d_-su_%d", NDim, FinalDivPerEdge, ScUp);
+		sprintf(Execution, "FirstLEBonGrid-1.2_-n_%d_-g_%d_-su_%d", NDim, FinalDivPerEdge, ScUp);
 	else
-		sprintf(Execution, "FirstLEBonGrid-1.1_-n_%d_-ep_%3.4f_-su_%d", NDim, Epsilon, ScUp);
+		sprintf(Execution, "FirstLEBonGrid-1.2_-n_%d_-ep_%3.4f_-su_%d", NDim, Epsilon, ScUp);
 	fprintf(stderr, "%s\n", Execution);
 
 	c1 = times(&t1);

@@ -362,7 +362,7 @@ VOID DivideSimplex(PPSIMPLEX ppS, PPSIMPLEX ppS1, INT NDim) {
 
 	EdgeToBisect(*ppS, &V1, &V2);
 
-	/*Calculate the middle point between vertex V1 and V2.                       */
+	/*Calculate the middle point between vertex V1 and V2.*/
 	MiddlePoint((*ppS)->ppV[V1]->pX, (*ppS)->ppV[V2]->pX, pRV, NDim);
 
 	CopyVR((*ppS1)->ppV[V1]->pX, pRV, NDim);
